@@ -23,6 +23,12 @@
 # define PATH_SEPARATOR '/'
 #endif
 
+#ifdef __GNUC__
+# define PRINTF_FORMAT(si, ftc) __attribute__ ((format (printf, si, ftc)))
+#else
+# define PRINTF_FORMAT(si, ftc)
+#endif
+
 // MSVC-specific definitions
 #ifdef _MSC_VER
 # define strdup _strdup
@@ -183,14 +189,30 @@ struct opf {
 
 struct epuberr {
   char lastStr[1025];
+  const char *str;
   int len;
+  int type; /* for str: 0 = lastStr, 1 = external */
 }; 
+extern const char _epub_error_oom[];
+#define _epub_err_set_const_str(_err, _err_string) \
+  do { \
+    (_err)->str = _err_string; \
+    (_err)->type = 1; \
+  } while (0)
+#define _epub_err_set_str(_err, _err_string, _err_string_len) \
+  do { \
+    strncpy((_err)->lastStr, _err_string, _err_string_len); \
+    (_err)->len = _err_string_len; \
+    (_err)->str = (_err)->lastStr; \
+    (_err)->type = 0; \
+  } while (0)
+#define _epub_err_set_oom(_epub_err) _epub_err_set_const_str(_epub_err, _epub_error_oom)
 
 // general structs
 struct epub {
   struct ocf *ocf;
   struct opf *opf;
-  struct epuberr *error;
+  struct epuberr error;
   int debug;
 
 };
@@ -270,9 +292,8 @@ struct manifest *_opf_manifest_get_by_id(struct opf *opf, xmlChar* id);
 
 // epub functions
 struct epub *epub_open(const char *filename, int debug);
-void _epub_print_debug(struct epub *epub, int debug, char *format, ...);
+void _epub_print_debug(struct epub *epub, int debug, const char *format, ...) PRINTF_FORMAT(3, 4);
 char *epub_last_errStr(struct epub *epub);
-void _epub_print_debug(struct epub *epub, int debug, char *format, ...);
 
 // List operations
 void _list_free_root(struct root *data);

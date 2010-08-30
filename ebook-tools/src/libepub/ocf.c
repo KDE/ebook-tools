@@ -8,6 +8,10 @@ int _ocf_parse_mimetype(struct ocf *ocf) {
     _epub_print_debug(ocf->epub, DEBUG_WARNING, 
                       "Can't get mimetype, assuming application/epub+zip (-)");
     ocf->mimetype = malloc(sizeof(char) * strlen("application/epub+zip")+1);
+	if (! ocf->mimetype) {
+		_epub_print_debug(ocf->epub, DEBUG_ERROR, "no memory for mimetype");
+		return -1;
+	}
     strcpy(ocf->mimetype, "application/epub+zip");
   } else {
     _epub_print_debug(ocf->epub, DEBUG_INFO, "mimetype found %s", ocf->mimetype);
@@ -21,8 +25,8 @@ int _ocf_parse_container(struct ocf *ocf) {
   _epub_print_debug(ocf->epub, DEBUG_INFO, "parsing container file %s", 
                     METAINFO_DIR "/" CONTAINER_FILENAME);
 
-  char *containerXml;
-  char *name = CONTAINER_FILENAME;
+  char *containerXml = NULL;
+  const char *name = CONTAINER_FILENAME;
   if (! _ocf_get_file(ocf, METAINFO_DIR "/" CONTAINER_FILENAME, &containerXml))
     return 0;
   
@@ -33,25 +37,44 @@ int _ocf_parse_container(struct ocf *ocf) {
                               name, NULL, 0);
   if (reader != NULL) {
     ret = xmlTextReaderRead(reader);
-    while (ret == 1) {
 
-      if (xmlStrcmp(xmlTextReaderConstName(reader), 
-                    (xmlChar *)"rootfile") == 0) {
-        struct root *newroot = malloc(sizeof(struct root));
-        newroot->mediatype = 
-          xmlTextReaderGetAttribute(reader, (xmlChar *)"media-type");
-        newroot->fullpath =
-          xmlTextReaderGetAttribute(reader, (xmlChar *)"full-path");
-        AddNode(ocf->roots, NewListNode(ocf->roots, newroot));
-  
-        _epub_print_debug(ocf->epub, DEBUG_INFO, 
-                          "found root in %s media-type is %s",
-                          newroot->fullpath, newroot->mediatype);
-      }
-
-      ret = xmlTextReaderRead(reader);
-    }
-
+	while (ret == 1) {
+		// Checking for container tag for validation
+		if(xmlStrcasecmp(xmlTextReaderConstLocalName(reader),
+						 (xmlChar *)"container") == 0) {
+			
+			_epub_print_debug(ocf->epub, DEBUG_INFO, 
+							  "Found containerr");
+		// Checking for rootfiles tag for validation
+		} else if(xmlStrcasecmp(xmlTextReaderConstLocalName(reader),
+								(xmlChar *)"rootfiles") == 0) {
+			
+			_epub_print_debug(ocf->epub, DEBUG_INFO, 
+							  "Found rootfiles");
+		} else if (xmlStrcasecmp(xmlTextReaderConstLocalName(reader),
+								 (xmlChar *)"rootfile") == 0) {
+				
+			struct root *newroot = malloc(sizeof(struct root));
+			if (! newroot) {
+				_epub_print_debug(ocf->epub, DEBUG_ERROR, "No memory left for root");
+				xmlFreeTextReader(reader);
+				free(containerXml);
+				return 0;
+			}
+			newroot->mediatype = 
+				xmlTextReaderGetAttribute(reader, (xmlChar *)"media-type");
+			newroot->fullpath =
+				xmlTextReaderGetAttribute(reader, (xmlChar *)"full-path");
+			AddNode(ocf->roots, NewListNode(ocf->roots, newroot));
+			
+				_epub_print_debug(ocf->epub, DEBUG_INFO, 
+								  "found root in %s media-type is %s",
+								  newroot->fullpath, newroot->mediatype);
+				
+		}
+		ret = xmlTextReaderRead(reader);
+	}
+	
     xmlFreeTextReader(reader);
     free(containerXml);
     if (ret != 0) {
@@ -123,42 +146,42 @@ int _ocf_get_file(struct ocf *ocf, const char *filename, char **fileStr) {
   struct zip *arch = ocf->arch;
   
   struct zip_file *file = NULL;
-  struct zip_stat *fileStat = malloc(sizeof(struct zip_stat));
+  struct zip_stat fileStat;
 
+  zip_stat_init(&fileStat);
   *fileStr = NULL;
 
-  if (zip_stat(arch, filename, ZIP_FL_UNCHANGED, fileStat) == -1) {
+  if (zip_stat(arch, filename, ZIP_FL_UNCHANGED, &fileStat) == -1) {
     _epub_print_debug(epub, DEBUG_INFO, "%s - %s", 
                       filename, zip_strerror(arch));
-    free(fileStat);
     return -1;
   }
 
-  if (! (file = zip_fopen_index(arch, fileStat->index, ZIP_FL_NODIR))) {
+  if (! (file = zip_fopen_index(arch, fileStat.index, ZIP_FL_NODIR))) {
     _epub_print_debug(epub, DEBUG_INFO, "%s - %s", 
                       filename, zip_strerror(arch));
-    free(fileStat);
     return -1;
   }
 
-  *fileStr = (char *)malloc((fileStat->size+1)* sizeof(char));
+  *fileStr = (char *)malloc((fileStat.size+1)* sizeof(char));
+  if (! fileStr) {
+	  _epub_print_debug(epub, DEBUG_ERROR, "Failed to allocate memory for file string");
+	  return -1;
+  }
   
   int size;
-  if ((size = zip_fread(file, *fileStr, fileStat->size)) == -1) {
+  if ((size = zip_fread(file, *fileStr, fileStat.size)) == -1) {
     _epub_print_debug(epub, DEBUG_INFO, "%s - %s", 
                       filename, zip_strerror(arch));
   } else {
     (*fileStr)[size] = 0;
   }
-  
-  free(fileStat);
 
   if (zip_fclose(file) == -1) {
     _epub_print_debug(epub, DEBUG_INFO, "%s - %s", 
                       filename, zip_strerror(arch));
     free(*fileStr);
     *fileStr = NULL;
-    free(fileStat);
     return -1;
   }
   
@@ -181,23 +204,37 @@ struct ocf *_ocf_parse(struct epub *epub, const char *filename) {
   _epub_print_debug(epub, DEBUG_INFO, "building ocf struct");
   
   struct ocf *ocf = malloc(sizeof(struct ocf));
+  if (!ocf) {
+    _epub_err_set_oom(&epub->error);
+    return NULL;
+  }
+  memset(ocf, 0, sizeof(struct ocf));
   ocf->epub = epub;
-  ocf->datapath = NULL;
   ocf->roots = NewListAlloc(LIST, NULL, NULL, 
                             (NodeCompareFunc)_list_cmp_root_by_mediatype);
   ocf->filename = malloc(sizeof(char)*(strlen(filename)+1));
 
+  if ( ! ocf->filename) {
+	  _epub_print_debug(epub, DEBUG_ERROR, "Failed to allocate memory for filename");
+	  return NULL;
+  }
+
   strcpy(ocf->filename, filename);
   
-  if (! (ocf->arch = _ocf_open(ocf, ocf->filename)))
-    return NULL;
+  if (! (ocf->arch = _ocf_open(ocf, ocf->filename))) {
+	  _ocf_close(ocf);
+	  return NULL;
+  }
   
   // Find the mime type
-  _ocf_parse_mimetype(ocf);
-
+  if (_ocf_parse_mimetype(ocf) == -1) {
+	  _ocf_close(ocf);
+	  return NULL;
+  }
+  
   // Parse the container for roots
   _ocf_parse_container(ocf);
-    
+  
   // Unsupported files
    _ocf_not_supported(ocf, METAINFO_DIR "/" MANIFEST_FILENAME);
    _ocf_not_supported(ocf, METAINFO_DIR "/" METADATA_FILENAME);
@@ -211,6 +248,12 @@ struct ocf *_ocf_parse(struct epub *epub, const char *filename) {
 int _ocf_get_data_file(struct ocf *ocf, const char *filename, char **fileStr) {
   int size;
   char *fullname = malloc((strlen(filename)+strlen(ocf->datapath)+1)*sizeof(char));
+
+  if (!fullname) {
+	  _epub_print_debug(ocf->epub, DEBUG_ERROR, "Failed to allocate memory for file name");
+	  return -1;
+  }
+
   strcpy(fullname, ocf->datapath);
   strcat(fullname, filename);
   size = _ocf_get_file(ocf, fullname, fileStr);

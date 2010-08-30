@@ -2,17 +2,23 @@
 #include "epublib.h"
 #include <stdarg.h>
 
+const char _epub_error_oom[] = "out of memory";
+
 struct epub *epub_open(const char *filename, int debug) {
   char *opfName = NULL;
   char *opfStr = NULL;
+  char *pathsep_index = NULL;
 
   struct epub *epub = malloc(sizeof(struct epub));
+  if (! epub) {
+    _epub_err_set_oom(&epub->error);
+    return NULL;
+  }
   epub->ocf = NULL;
   epub->opf = NULL;
-
-  epub->error = malloc(sizeof(struct epuberr));
+  _epub_err_set_str(&epub->error, "", 0);
   epub->debug = debug;
-  _epub_print_debug(epub, DEBUG_INFO, "opening %s", filename);
+  _epub_print_debug(epub, DEBUG_INFO, "opening '%s'", filename);
   
   LIBXML_TEST_VERSION;
   
@@ -29,10 +35,10 @@ struct epub *epub_open(const char *filename, int debug) {
   }
 
   epub->ocf->datapath = malloc(sizeof(char) *(strlen(opfName) +1));
-  char *index = strrchr(opfName, PATH_SEPARATOR);
-  if (index) {
-    strncpy(epub->ocf->datapath, opfName, index + 1 - opfName); 
-    epub->ocf->datapath[index - opfName + 1] = 0;
+  pathsep_index = strrchr(opfName, PATH_SEPARATOR);
+  if (pathsep_index) {
+    strncpy(epub->ocf->datapath, opfName, pathsep_index + 1 - opfName); 
+    epub->ocf->datapath[pathsep_index - opfName + 1] = 0;
   }    
   else {
     epub->ocf->datapath[0] = 0;
@@ -50,6 +56,11 @@ struct epub *epub_open(const char *filename, int debug) {
   }
 
   epub->opf = _opf_parse(epub, opfStr);
+  if (!epub->opf) {
+    free(opfStr);
+    epub_close(epub);
+    return NULL;
+  }
   
   free(opfStr);
 
@@ -107,9 +118,14 @@ xmlChar *_getRoleStr(void *creator) {
 xmlChar **epub_get_metadata(struct epub *epub, enum epub_metadata type, 
                             int *size) {
   xmlChar **data = NULL;
-  listPtr list;
-  xmlChar *(*getStr)(void *);
+  listPtr list = NULL;
+  xmlChar *(*getStr)(void *) = NULL;
   int i;
+
+  if (!epub || !epub->opf || !epub->opf->metadata) {
+    _epub_print_debug(epub, DEBUG_INFO, "no metadata information available");
+    return NULL;
+  }
 
   switch(type) {
   case EPUB_ID:
@@ -176,14 +192,22 @@ xmlChar **epub_get_metadata(struct epub *epub, enum epub_metadata type,
     list = epub->opf->metadata->meta;
     getStr = _getMetaStr;
     break;
+  default:
+    _epub_print_debug(epub, DEBUG_INFO, "fetching metadata: unknown type %d", type);
+    return NULL;
   }
 
-  *size = list->Size;
   if (list->Size <= 0)
     return NULL;
 
   data = malloc(list->Size * sizeof(xmlChar *));
-  
+  if (! data) {
+    _epub_err_set_oom(&epub->error);
+    return NULL;
+  }
+  if (size) {
+    *size = list->Size;
+  }
   list->Current = list->Head;
 
   data[0] = getStr(GetNode(list));
@@ -238,8 +262,17 @@ char *_get_spine_it_url(struct eiterator *it) {
 struct eiterator *epub_get_iterator(struct epub *epub, 
                                     enum eiterator_type type, int opt) {
 
-  struct eiterator *it = malloc(sizeof(struct eiterator));
-  
+  struct eiterator *it = NULL;
+
+  if (!epub) {
+    return NULL;
+  }
+
+  it = malloc(sizeof(struct eiterator));
+  if (!it) {
+    _epub_err_set_oom(&epub->error);
+    return NULL;
+  }
   it->type = type;
   it->epub = epub;
   it->opt = opt;
@@ -262,6 +295,10 @@ struct eiterator *epub_get_iterator(struct epub *epub,
 }
 
 void epub_free_iterator(struct eiterator *it) {
+  if (!it) {
+    return;
+  }
+
   if (it->cache)
     free(it->cache);
 
@@ -270,6 +307,10 @@ void epub_free_iterator(struct eiterator *it) {
 
 
 char *epub_it_get_curr_url(struct eiterator *it) {
+  if (!it) {
+    return NULL;
+  }
+
   switch (it->type) {
   case EITERATOR_SPINE:
   case EITERATOR_NONLINEAR:
@@ -282,7 +323,7 @@ char *epub_it_get_curr_url(struct eiterator *it) {
 
 char *epub_it_get_curr(struct eiterator *it) {
 
-  if (!it->curr)
+  if (!it || !it->curr)
     return NULL;
 
   if (!it->cache) {
@@ -299,7 +340,10 @@ char *epub_it_get_curr(struct eiterator *it) {
   return it->cache;
 }
 char *epub_it_get_next(struct eiterator *it) {
-  
+  if (!it) {
+    return NULL;
+  }
+
   if (it->cache) {
     free(it->cache);
     it->cache = NULL;
@@ -327,9 +371,10 @@ char *epub_it_get_next(struct eiterator *it) {
 }
 
 int epub_close(struct epub *epub) {
-  if (epub->error) 
-    free(epub->error);
- 
+  if (!epub) {
+    return 0;
+  }
+
   if (epub->ocf)
     _ocf_close(epub->ocf);
 
@@ -344,10 +389,14 @@ int epub_close(struct epub *epub) {
 }
 
 void epub_set_debug(struct epub *epub, int debug) {
+  if (!epub) {
+    return;
+  }
+
   epub->debug = debug;
 }
 
-void _epub_print_debug(struct epub *epub, int debug, char *format, ...) {
+void _epub_print_debug(struct epub *epub, int debug, const char *format, ...) {
   va_list ap;
   char strerr[1025];
 
@@ -356,12 +405,11 @@ void _epub_print_debug(struct epub *epub, int debug, char *format, ...) {
   vsnprintf(strerr, 1024, format, ap);
   strerr[1024] = 0;
   
-  if (debug == DEBUG_ERROR) {
-    epub->error->len = strlen(strerr);
-    strcpy(epub->error->lastStr, strerr);
+  if (epub && (debug == DEBUG_ERROR)) {
+    _epub_err_set_str(&epub->error, strerr, strlen(strerr));
   }
 
-  if (epub->debug >= debug) {
+  if (! epub || (epub->debug >= debug)) {
     fprintf(stderr, "libepub ");
     switch(debug) {
     case DEBUG_ERROR: 
@@ -384,7 +432,13 @@ void _epub_print_debug(struct epub *epub, int debug, char *format, ...) {
 }
 
 int epub_tit_next(struct titerator *tit) {
-  listnodePtr curr = tit->next;
+  listnodePtr curr = NULL;
+
+  if (!tit) {
+    return 0;
+  }
+
+  curr = tit->next;
   if (! curr) {
     tit->valid = 0;
     return 0;
@@ -425,7 +479,11 @@ int epub_tit_next(struct titerator *tit) {
 
 struct titerator *epub_get_titerator(struct epub *epub, 
                                      enum titerator_type type, int opt) {
-  struct titerator *it;
+  struct titerator *it = NULL;
+
+  if (!epub) {
+    return NULL;
+  }
 
   switch (type) {
   case TITERATOR_NAVMAP:
@@ -443,6 +501,10 @@ struct titerator *epub_get_titerator(struct epub *epub,
   }
 
   it = malloc(sizeof(struct titerator));
+  if (!it) {
+    _epub_err_set_oom(&epub->error);
+    return NULL;
+  }
   it->type = type;
   it->epub = epub;
   it->opt = opt;
@@ -489,37 +551,68 @@ struct titerator *epub_get_titerator(struct epub *epub,
 }
 
 int epub_tit_curr_valid(struct titerator *tit) {
+  if (!tit) {
+    return 0;
+  }
+
   return tit->valid;
 }
 
 char *epub_tit_get_curr_label(struct titerator *tit) {
+  if (!tit) {
+    return NULL;
+  }
+
   // FIXME how can there be unlabeled curr?
   return tit->cache.label?strdup(tit->cache.label):NULL;
 }
 
 int epub_tit_get_curr_depth(struct titerator *tit) {
+  if (!tit) {
+    return 0;
+  }
+
   return tit->cache.depth;
 }
 
 char *epub_tit_get_curr_link(struct titerator *tit) {
+  if (!tit) {
+    return NULL;
+  }
+
   return strdup(tit->cache.link);
 
 }
 
 void epub_free_titerator(struct titerator *tit) {
+  if (!tit) {
+    return;
+  }
 
   free(tit);
 }
   
 int epub_get_ocf_file(struct epub *epub, const char *filename, char **data) {
+  if (!epub) {
+    return -1;
+  }
+
   return _ocf_get_file(epub->ocf, filename, data);
 }
 
 int epub_get_data(struct epub *epub, const char *name, char **data) {
+  if (!epub) {
+    return -1;
+  }
+
   return _ocf_get_data_file(epub->ocf, name, data);
 }
 
 void epub_dump(struct epub *epub) {
+  if (!epub) {
+    return;
+  }
+
   _ocf_dump(epub->ocf);
   _opf_dump(epub->opf);
 }
@@ -529,9 +622,30 @@ void epub_cleanup() {
 }
 
 char *epub_last_errStr(struct epub *epub) {
-  char *errStr = epub->error->lastStr;
-  char *res = malloc(epub->error->len +1);
-  strcpy(errStr, res);
+  char *res = NULL;
+
+  if (!epub) {
+    return NULL;
+  }
+
+  switch (epub->error.type) {
+  case 0:
+    res = malloc(epub->error.len + 1);
+    if (!res) {
+      _epub_err_set_oom(&epub->error);
+      return NULL;
+    }
+    strncpy(res, epub->error.lastStr, epub->error.len);
+    res[epub->error.len] = 0;
+    break;
+  case 1:
+    res = strdup(epub->error.str);
+    if (!res) {
+      _epub_err_set_oom(&epub->error);
+      return NULL;
+    }
+    break;
+  }
 
   return res;
 }

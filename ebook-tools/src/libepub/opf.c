@@ -4,11 +4,12 @@ struct opf *_opf_parse(struct epub *epub, char *opfStr) {
   _epub_print_debug(epub, DEBUG_INFO, "building opf struct");
   
   struct opf *opf = malloc(sizeof(struct opf));
+  if (!opf) {
+    _epub_err_set_oom(&epub->error);
+    return NULL;
+  }
+  memset(opf, 0, sizeof(struct opf));
   opf->epub = epub;
-  opf->guide = NULL;
-  opf->tours = NULL;
-  opf->toc = NULL;
-  
  
   xmlTextReaderPtr reader;
   int ret;
@@ -41,7 +42,10 @@ struct opf *_opf_parse(struct epub *epub, char *opfStr) {
     if (ret != 0) {
       _epub_print_debug(opf->epub, DEBUG_ERROR, "failed to parse OPF");
       return NULL;
-    }
+    } else if(!opf->spine) {
+		_epub_print_debug(opf->epub, DEBUG_ERROR, "Ilegal OPF no spine found");
+		return NULL;
+	}
    } else {
      _epub_print_debug(opf->epub, DEBUG_ERROR, "unable to open OPF");
      return NULL;
@@ -189,7 +193,7 @@ void _opf_parse_metadata(struct opf *opf, xmlTextReaderPtr reader) {
       new->event = _get_possible_namespace(reader, (xmlChar *)"event",
                                                (xmlChar *)"opf");
       AddNode(meta->date, NewListNode(meta->date, new));
-      _epub_print_debug(opf->epub, DEBUG_INFO, "date is %s: %s", 
+      _epub_print_debug(opf->epub, DEBUG_INFO, "date of %s: %s", 
                         new->event, new->date); 
         
     } else if (xmlStrcasecmp(local, (xmlChar *)"subject") == 0) {
@@ -245,13 +249,8 @@ void _opf_parse_metadata(struct opf *opf, xmlTextReaderPtr reader) {
 struct toc *_opf_init_toc() {
   
   struct toc *toc = malloc(sizeof(struct toc));
-  
-  if (! toc)
-    return NULL;
- 
-  toc->navMap = NULL;
-  toc->pageList = NULL;
-  toc->navList = NULL;
+  memset(toc, 0, sizeof(struct toc));
+
   toc->playOrder = NewListAlloc(LIST, NULL, NULL, 
                                 (NodeCompareFunc)_list_cmp_toc_by_playorder);
 
@@ -260,9 +259,7 @@ struct toc *_opf_init_toc() {
 
 struct tocCategory *_opf_init_toc_category() {
   struct tocCategory *tc = malloc(sizeof(struct tocCategory));
-
-  tc->id = NULL;
-  tc->class = NULL;
+  memset(tc, 0, sizeof(struct tocCategory));
 
   tc->info = NewListAlloc(LIST, NULL, NULL, NULL); //tocLabel
   tc->label = NewListAlloc(LIST, NULL, NULL, NULL); //tocLabel
@@ -305,6 +302,7 @@ struct tocLabel *_opf_parse_navlabel(struct opf *opf, xmlTextReaderPtr reader) {
   int ret;
   
   struct tocLabel *new = malloc(sizeof(struct tocLabel));
+  memset(new, 0, sizeof(struct tocLabel));
 
   new->lang = xmlTextReaderGetAttribute(reader, (xmlChar *)"lang");
   new->dir = xmlTextReaderGetAttribute(reader, (xmlChar *)"dir");
@@ -332,13 +330,9 @@ struct tocLabel *_opf_parse_navlabel(struct opf *opf, xmlTextReaderPtr reader) {
 
 struct tocItem *_opf_init_toc_item(int depth) {
   struct tocItem *item = malloc(sizeof(struct tocItem));
+  memset(item, 0, sizeof(struct tocItem));
 
-  item->label = NULL;
-  item->type = NULL;
-  item->src = NULL;
   item->depth = depth;
-  item->id = NULL;
-  item->class = NULL;
   item->playOrder = -1;
   item->value = -1;
 
@@ -658,22 +652,27 @@ void _opf_parse_spine(struct opf *opf, xmlTextReaderPtr reader) {
   opf->tocName = xmlTextReaderGetAttribute(reader, (xmlChar *)"toc");
   
   if (opf->tocName) { 
-    char *tocStr;
+    char *tocStr = NULL;
     struct manifest *item;
     int size;
 
     _epub_print_debug(opf->epub, DEBUG_INFO, "toc is %s", opf->tocName);
     
     item = _opf_manifest_get_by_id(opf, opf->tocName);
-    size = _ocf_get_data_file(opf->epub->ocf, (char *)item->href, &tocStr);
-    
-    if (size <= 0) 
-      _epub_print_debug(opf->epub, DEBUG_ERROR, "unable to open toc file");
-    else
-    _opf_parse_toc(opf, tocStr, size);
-
-    free(tocStr);
-
+	if (item != NULL) {
+		size = _ocf_get_data_file(opf->epub->ocf, (char *)item->href, &tocStr);
+		
+		if (size <= 0) {
+			_epub_print_debug(opf->epub, DEBUG_ERROR, "Faulty toc file %s",
+							  opf->tocName);
+		} else {
+			_opf_parse_toc(opf, tocStr, size);
+			free(tocStr);
+		}
+	} else {
+		_epub_print_debug(opf->epub, DEBUG_ERROR, "Toc not in manifest (-) %s",
+						  opf->tocName);
+	}
   } else {
     _epub_print_debug(opf->epub, DEBUG_WARNING, "toc not found (-)"); 
     opf->toc = NULL;
@@ -682,7 +681,7 @@ void _opf_parse_spine(struct opf *opf, xmlTextReaderPtr reader) {
   
   ret = xmlTextReaderRead(reader);
   while (ret == 1 && 
-         xmlStrcasecmp(xmlTextReaderConstName(reader), (xmlChar *)"spine")) {
+         xmlStrcasecmp(xmlTextReaderConstLocalName(reader), (xmlChar *)"spine")) {
   
     // ignore non starting tags
     if (xmlTextReaderNodeType(reader) != 1) {
@@ -691,6 +690,7 @@ void _opf_parse_spine(struct opf *opf, xmlTextReaderPtr reader) {
     }
 
     struct spine *item = malloc(sizeof(struct spine));
+	memset(item, 0, sizeof(struct spine));
 
     item->idref = xmlTextReaderGetAttribute(reader, (xmlChar *)"idref");
     linear = xmlTextReaderGetAttribute(reader, (xmlChar *)"linear");
@@ -724,7 +724,7 @@ void _opf_parse_manifest(struct opf *opf, xmlTextReaderPtr reader) {
   ret = xmlTextReaderRead(reader);
 
   while (ret == 1 && 
-         xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"manifest")) {
+         xmlStrcasecmp(xmlTextReaderConstLocalName(reader),(xmlChar *)"manifest")) {
     struct manifest *item;
 
     // ignore non starting tags
@@ -772,7 +772,7 @@ void _opf_parse_guide(struct opf *opf, xmlTextReaderPtr reader) {
 
   ret = xmlTextReaderRead(reader);
   while (ret == 1 && 
-         xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"guides")) {
+         xmlStrcasecmp(xmlTextReaderConstLocalName(reader),(xmlChar *)"guides")) {
 
     // ignore non starting tags
     if (xmlTextReaderNodeType(reader) != 1) {
@@ -800,7 +800,7 @@ listPtr _opf_parse_tour(struct opf *opf, xmlTextReaderPtr reader) {
   ret = xmlTextReaderRead(reader);
   
   while (ret == 1 && 
-         xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"tour")) {
+         xmlStrcasecmp(xmlTextReaderConstLocalName(reader),(xmlChar *)"tour")) {
 
     // ignore non starting tags
     if (xmlTextReaderNodeType(reader) != 1) {
@@ -831,7 +831,7 @@ void _opf_parse_tours(struct opf *opf, xmlTextReaderPtr reader) {
   ret = xmlTextReaderRead(reader);
   
   while (ret == 1 && 
-         xmlStrcasecmp(xmlTextReaderConstName(reader), (xmlChar *)"tours")) {
+         xmlStrcasecmp(xmlTextReaderConstLocalName(reader), (xmlChar *)"tours")) {
     
     // ignore non starting tags
     if (xmlTextReaderNodeType(reader) != 1) {
