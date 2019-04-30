@@ -398,6 +398,10 @@ void _opf_parse_navmap(struct opf *opf, xmlTextReaderPtr reader) {
      
       } else if (xmlTextReaderNodeType(reader) == 15) {
         if (item) {
+          if (! item->label) {
+            _epub_print_debug(opf->epub, DEBUG_WARNING, 
+                              "- missing navlabel for nav point element");
+          }
           _epub_print_debug(opf->epub, DEBUG_INFO, 
                             "adding nav point item->%s %s (d:%d,p:%d)", 
                             item->id, item->src, item->depth, item->playOrder);

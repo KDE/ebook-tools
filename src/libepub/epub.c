@@ -469,8 +469,9 @@ int epub_tit_next(struct titerator *tit) {
   case TITERATOR_NAVMAP:
   case TITERATOR_PAGES:
     ti = GetNodeData(curr);
-    tit->cache.label = 
-      (char *)_opf_label_get_by_doc_lang(tit->epub->opf, ti->label);
+    if (ti->label)
+      tit->cache.label =
+        (char *)_opf_label_get_by_doc_lang(tit->epub->opf, ti->label);
 
     if (! tit->cache.label)
       tit->cache.label = (char *)ti->id;
