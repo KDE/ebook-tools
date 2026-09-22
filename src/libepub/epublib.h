@@ -288,7 +288,7 @@ void _opf_free_toc(struct toc *toc);
 struct toc *_opf_init_toc();
 struct tocCategory *_opf_init_toc_category();
 
-xmlChar *_opf_label_get_by_lang(struct opf *opf, listPtr label, char *lang);
+xmlChar *_opf_label_get_by_lang(listPtr label, char *lang);
 xmlChar *_opf_label_get_by_doc_lang(struct opf *opf, listPtr label);
 
 struct manifest *_opf_manifest_get_by_id(struct opf *opf, xmlChar* id);

@@ -888,7 +888,7 @@ void _opf_parse_tours(struct opf *opf, xmlTextReaderPtr reader) {
   }
 }
 
-xmlChar *_opf_label_get_by_lang(struct opf *opf, listPtr label, char *lang) {
+xmlChar *_opf_label_get_by_lang(listPtr label, char *lang) {
   struct tocLabel data, *tmp;
   data.lang = (xmlChar *)lang;
   label->compare = (NodeCompareFunc)_list_cmp_label_by_lang;
@@ -899,7 +899,7 @@ xmlChar *_opf_label_get_by_lang(struct opf *opf, listPtr label, char *lang) {
 
 xmlChar *_opf_label_get_by_doc_lang(struct opf *opf, listPtr label) {
   opf->metadata->lang->Current = opf->metadata->lang->Head;
-  return _opf_label_get_by_lang(opf, label, 
+  return _opf_label_get_by_lang(label,
                                 (char *)GetNode(opf->metadata->lang));
 }
 
