@@ -132,7 +132,7 @@ typedef int (* NodeCompareFunc)(void *, void *);
    Results are undefined if one or both pointers are NULL. (note that this
    definition is compatible with strcmp() and related functions) */ 
 
-typedef int (* ListDumpFunc)(void *);
+typedef void (* ListDumpFunc)(void *);
 /* Function to dump the data of a node to the screen */
 
 typedef struct ListNode* listnodePtr;
