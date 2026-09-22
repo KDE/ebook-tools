@@ -18,7 +18,6 @@ void usage(int code) {
   fprintf(stderr, "   -d\t Debug mode (implies -vvv)\n");
   fprintf(stderr, "   -p\t Linear print book (normal reading)\n");
   fprintf(stderr, "   -pp\t Print the whole book\n");
-  fprintf(stderr, "   -t <tour id>\t prints the tour <tour id>\n");
 
   exit(code);
 }
@@ -26,13 +25,11 @@ void usage(int code) {
 int main(int argc , char **argv) {
   struct epub *epub;
   char *filename = NULL;
-  char *tourId = NULL;
-  int verbose = 0, print = 0, debug = 0, quiet = 0, tour = 0;
+  int verbose = 0, print = 0, debug = 0, quiet = 0;
   
   int i, j, len;
   
   for (i = 1;i<argc;i++) {
-    loop:          
 
     if (argv[i][0] == '-') {
       len = strlen(argv[i]);
@@ -53,24 +50,6 @@ int main(int argc , char **argv) {
           break;
         case 'h':
           usage(0);
-          break;
-        case 't':
-          tour++;
-          if (tour > 1) {
-            fprintf(stderr, "Only one tour at a time is supported\n");
-            usage(2);
-          }
-
-          i++;
-          if (i<argc) {
-            tourId = argv[i];
-          } else {  
-            fprintf(stderr, "Missing tour id\n");
-            usage(2);
-          }
-
-          i++;
-          goto loop;
           break;
         default:
           fprintf(stderr, "Unknown flag %s\n", argv[i]);
@@ -125,10 +104,6 @@ int main(int argc , char **argv) {
 
   }
   
-  if (tour) {
-    printf("Tours are still not supported\n");
-  }
-
   if (! epub_close(epub)) {
     quit(1);
   }
