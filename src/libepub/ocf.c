@@ -100,12 +100,15 @@ void _ocf_dump(struct ocf *ocf) {
 struct zip *_ocf_open(struct ocf *ocf, const char *filename) {
 
   int err;
-  char errStr[8192];
+  zip_error_t zipError;
   struct zip *arch = NULL;
 
   if (! (arch = zip_open(filename, 0, &err))) {
-    zip_error_to_str(errStr, sizeof(errStr), err, errno);
-    _epub_print_debug(ocf->epub, DEBUG_ERROR, "%s - %s", filename, errStr); 
+    zip_error_init(&zipError);
+    zip_error_set(&zipError, err, errno);
+    _epub_print_debug(ocf->epub, DEBUG_ERROR, "%s - %s", filename,
+                      zip_error_strerror(&zipError));
+    zip_error_fini(&zipError);
   }
   
   return arch;
@@ -301,4 +304,3 @@ char *_ocf_root_by_type(struct ocf *ocf, const char *type) {
 
   return rootXml;
 }
-
