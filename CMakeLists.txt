@@ -1,6 +1,6 @@
-project (EBOOK-TOOLS C)
+cmake_minimum_required(VERSION 3.28)
 
-cmake_minimum_required(VERSION 2.4.0)
+project (EBOOK-TOOLS C)
 
 #set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(LIBRARY_OUTPUT_PATH ${EBOOK-TOOLS_BINARY_DIR}/libs)
