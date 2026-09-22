@@ -74,7 +74,7 @@ xmlChar *_getIdStr(void *id) {
   struct id *data = (struct id *)id;
   xmlChar buff[10000];
 
-  xmlStrPrintf(buff, 10000, (xmlChar *)"%s (%s:%s)", 
+  xmlStrPrintf(buff, 10000, "%s (%s:%s)",
                ((data->scheme)?data->scheme:(xmlChar *)"Unspecified"), 
                (data->id?data->id:(xmlChar *)"Unspecified"),
                 data->string);
@@ -86,7 +86,7 @@ xmlChar *_getDateStr(void *date) {
   struct date *data = (struct date *)date;
   xmlChar buff[10000];
 
-  xmlStrPrintf(buff, 10000, (xmlChar *)"%s: %s", 
+  xmlStrPrintf(buff, 10000, "%s: %s",
                ((data->event)?data->event:(xmlChar *)"Unspecified"), 
                data->date);
 
@@ -97,7 +97,7 @@ xmlChar *_getMetaStr(void *meta) {
   struct meta *data = (struct meta *)meta;
   xmlChar buff[10000];
 
-  xmlStrPrintf(buff, 10000, (xmlChar *)"%s: %s", 
+  xmlStrPrintf(buff, 10000, "%s: %s",
                ((data->name)?data->name:(xmlChar *)"Unspecified"),
                ((data->content)?data->content:(xmlChar *)"Unspecified"));
   
@@ -107,7 +107,7 @@ xmlChar *_getMetaStr(void *meta) {
 xmlChar *_getRoleStr(void *creator) {
   struct creator *data = (struct creator *)creator;
   xmlChar buff[10000];
-  xmlStrPrintf(buff, 10000, (xmlChar *)"%s: %s(%s)", 
+  xmlStrPrintf(buff, 10000, "%s: %s(%s)",
                ((data->role)?data->role:(xmlChar *)"Author"), 
                data->name, ((data->fileAs)?data->fileAs:data->name));
   
