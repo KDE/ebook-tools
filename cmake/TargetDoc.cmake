@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2007 Ely Levy <elylevy@cs.huji.ac.il>
+#
+# SPDX-License-Identifier: MIT
+
 # -helper macro to add a "doc" target with CMake build system. 
 # and configure doxy.config.in to doxy.config
 #

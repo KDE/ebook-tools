@@ -1,3 +1,12 @@
+/*
+    SPDX-FileCopyrightText: 2026 Albert Astals Cid <aacid@kde.org>
+    SPDX-FileCopyrightText: 2007-2012 Ely Levy <elylevy@cs.huji.ac.il>
+    SPDX-FileCopyrightText: 2009-2011 Pino Toscano <pino@kde.org>
+    SPDX-FileCopyrightText: 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+
+    SPDX-License-Identifier: MIT
+*/
+
 #include "epub.h"
 #include "epublib.h"
 #include <stdarg.h>

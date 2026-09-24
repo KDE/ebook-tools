@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2026 Albert Astals Cid <aacid@kde.org>
+# SPDX-FileCopyrightText: 2007-2008 Ely Levy <elylevy@cs.huji.ac.il>
+# SPDX-FileCopyrightText: 2008-2011 Pino Toscano <pino@kde.org>
+#
+# SPDX-License-Identifier: MIT
+
 cmake_minimum_required(VERSION 3.28)
 
 project (EBOOK-TOOLS C)

@@ -1,3 +1,11 @@
+/*
+    SPDX-FileCopyrightText: 2026 Albert Astals Cid <aacid@kde.org>
+    SPDX-FileCopyrightText: 2007-2012 Ely Levy <elylevy@cs.huji.ac.il>
+    SPDX-FileCopyrightText: 2010 Pino Toscano <pino@kde.org>
+
+    SPDX-License-Identifier: MIT
+*/
+
 #include "epublib.h"
 
 int _ocf_parse_mimetype(struct ocf *ocf) {

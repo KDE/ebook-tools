@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2007 Ely Levy <elylevy@cs.huji.ac.il>
+#
+# SPDX-License-Identifier: MIT
+
 # FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME (DEFAULT_MSG|"Custom failure message") VAR1 ... )
 #    This macro is intended to be used in FindXXX.cmake modules files.
 #    It handles the REQUIRED and QUIET argument to FIND_PACKAGE() and

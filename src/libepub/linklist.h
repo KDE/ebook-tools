@@ -1,3 +1,10 @@
+/*
+    SPDX-FileCopyrightText: 2026 Albert Astals Cid <aacid@kde.org>
+    SPDX-FileCopyrightText: 2007 Ely Levy <elylevy@cs.huji.ac.il>
+
+    SPDX-License-Identifier: MIT
+*/
+
 /* LinkList.H -- ANSI C Linked List Container Type
                  Handles Lists, Queues, Stacks, Splay Trees, 
 		   and custom list types via one consistant interface.

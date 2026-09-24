@@ -1,3 +1,11 @@
+/*
+    SPDX-FileCopyrightText: 2026 Albert Astals Cid <aacid@kde.org>
+    SPDX-FileCopyrightText: 2007-2008 Ely Levy <elylevy@cs.huji.ac.il>
+    SPDX-FileCopyrightText: 2010 Pino Toscano <pino@kde.org>
+
+    SPDX-License-Identifier: MIT
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

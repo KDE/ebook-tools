@@ -1,3 +1,11 @@
+/*
+    SPDX-FileCopyrightText: 2008 Ely Levy <elylevy@cs.huji.ac.il>
+    SPDX-FileCopyrightText: 2013 Jeff Zheng <jeff-zheng@users.sourceforge.net>
+    SPDX-FileCopyrightText: 2009-2010 Pino Toscano <pino@kde.org>
+
+    SPDX-License-Identifier: MIT
+*/
+
 #ifndef EPUB_SHARED_H
 #define EPUB_SHARED_H 1
 

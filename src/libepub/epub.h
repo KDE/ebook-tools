@@ -1,3 +1,10 @@
+/*
+    SPDX-FileCopyrightText: 2007-2012 Ely Levy <elylevy@cs.huji.ac.il>
+    SPDX-FileCopyrightText: 2009-2010 Pino Toscano <pino@kde.org>
+
+    SPDX-License-Identifier: MIT
+*/
+
 #ifndef EPUB_H
 #define EPUB_H 1
 

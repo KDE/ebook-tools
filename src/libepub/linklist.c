@@ -1,3 +1,9 @@
+/*
+    SPDX-FileCopyrightText: 2007-2010 Ely Levy <elylevy@cs.huji.ac.il>
+
+    SPDX-License-Identifier: MIT
+*/
+
 /* LinkList.C -- ANSI C Linked List Container Type
                  Handles Lists, Queues, Stacks, Splay trees,
 		   and custom list types via one consistant interface. 

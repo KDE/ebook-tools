@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2007-2010 Ely Levy <elylevy@cs.huji.ac.il>
+# SPDX-FileCopyrightText: 2008-2011 Pino Toscano <pino@kde.org>
+#
+# SPDX-License-Identifier: MIT
+
 include_directories (${EBOOK-TOOLS_SOURCE_DIR}/src/libepub ${LIBXML2_INCLUDE_DIR} ${LIBZIP_INCLUDE_DIR})
 add_library (epub SHARED epub.c ocf.c opf.c linklist.c list.c)
 target_link_libraries (epub ${LIBZIP_LIBRARY} ${LIBXML2_LIBRARIES})

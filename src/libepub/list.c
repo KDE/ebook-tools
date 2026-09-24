@@ -1,3 +1,10 @@
+/*
+    SPDX-FileCopyrightText: 2007-2008 Ely Levy <elylevy@cs.huji.ac.il>
+    SPDX-FileCopyrightText: 2013 Jeff Zheng <jeff-zheng@users.sourceforge.net>
+
+    SPDX-License-Identifier: MIT
+*/
+
 #include "epublib.h"
 
 // Free root struct

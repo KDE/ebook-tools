@@ -1,3 +1,12 @@
+/*
+    SPDX-FileCopyrightText: 2026 Albert Astals Cid <aacid@kde.org>
+    SPDX-FileCopyrightText: 2007-2010 Ely Levy <elylevy@cs.huji.ac.il>
+    SPDX-FileCopyrightText: 2013 Jeff Zheng <jeff-zheng@users.sourceforge.net>
+    SPDX-FileCopyrightText: 2009-2010 Pino Toscano <pino@kde.org>
+
+    SPDX-License-Identifier: MIT
+*/
+
 #ifndef EPUBLIB_H
 #define EPUBLIB_H 1
 // generally needed includes

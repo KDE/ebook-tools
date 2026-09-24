@@ -1,3 +1,13 @@
+/*
+    SPDX-FileCopyrightText: 2026 Albert Astals Cid <aacid@kde.org>
+    SPDX-FileCopyrightText: 2007-2011 Ely Levy <elylevy@cs.huji.ac.il>
+    SPDX-FileCopyrightText: 2013 Jeff Zheng <jeff-zheng@users.sourceforge.net>
+    SPDX-FileCopyrightText: 2010 Pino Toscano <pino@kde.org>
+    SPDX-FileCopyrightText: 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+
+    SPDX-License-Identifier: MIT
+*/
+
 #include "epublib.h"
 
 struct opf *_opf_parse(struct epub *epub, char *opfStr) {

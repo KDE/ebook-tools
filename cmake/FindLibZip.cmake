@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2007 Ely Levy <elylevy@cs.huji.ac.il>
+# SPDX-FileCopyrightText: 2008 Pino Toscano <pino@kde.org>
+#
+# SPDX-License-Identifier: MIT
+
 # - Try to find libzip
 # Once done this will define
 #

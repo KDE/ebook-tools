@@ -1,3 +1,9 @@
+/*
+    SPDX-FileCopyrightText: 2008-2010 Ely Levy <elylevy@cs.huji.ac.il>
+
+    SPDX-License-Identifier: MIT
+*/
+
 #ifndef _LIBEPUB_VERSION_H_
 #define _LIBEPUB_VERSION_H_
 
