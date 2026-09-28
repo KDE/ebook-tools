@@ -264,7 +264,10 @@ char *_get_spine_it_url(struct eiterator *it) {
 	  return NULL;
   
   data = GetNodeData(it->curr);
-  tmp = _opf_manifest_get_by_id(it->epub->opf, 
+  if (!data)
+	  return NULL;
+
+  tmp = _opf_manifest_get_by_id(it->epub->opf,
                                 ((struct spine *)data)->idref);
   if (!tmp) {
 	  _epub_print_debug(it->epub, DEBUG_ERROR, 
