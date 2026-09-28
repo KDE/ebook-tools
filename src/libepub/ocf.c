@@ -72,12 +72,16 @@ int _ocf_parse_container(struct ocf *ocf) {
 				xmlTextReaderGetAttribute(reader, (xmlChar *)"media-type");
 			newroot->fullpath =
 				xmlTextReaderGetAttribute(reader, (xmlChar *)"full-path");
-			AddNode(ocf->roots, NewListNode(ocf->roots, newroot));
-			
-				_epub_print_debug(ocf->epub, DEBUG_INFO, 
-								  "found root in %s media-type is %s",
-								  newroot->fullpath, newroot->mediatype);
-				
+
+			if (!newroot->mediatype || !newroot->fullpath) {
+				_list_free_root(newroot);
+			} else {
+				AddNode(ocf->roots, NewListNode(ocf->roots, newroot));
+
+					_epub_print_debug(ocf->epub, DEBUG_INFO,
+									"found root in %s media-type is %s",
+									newroot->fullpath, newroot->mediatype);
+			}
 		}
 		ret = xmlTextReaderRead(reader);
 	}
