@@ -926,6 +926,10 @@ xmlChar *_opf_label_get_by_lang(listPtr label, char *lang) {
 }
 
 xmlChar *_opf_label_get_by_doc_lang(struct opf *opf, listPtr label) {
+  if (!opf->metadata) {
+    _epub_print_debug(opf->epub, DEBUG_INFO, "no metadata information available");
+    return NULL;
+  }
   opf->metadata->lang->Current = opf->metadata->lang->Head;
   return _opf_label_get_by_lang(label,
                                 (char *)GetNode(opf->metadata->lang));
