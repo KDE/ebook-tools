@@ -794,6 +794,12 @@ void _opf_parse_manifest(struct opf *opf, xmlTextReaderPtr reader) {
       xmlTextReaderGetAttribute(reader, (xmlChar *)"required-namespace");
     item->modules = 
       xmlTextReaderGetAttribute(reader, (xmlChar *)"required-modules");
+
+    if (!item->id || !item->href || !item->type) {
+      _list_free_manifest(item);
+      ret = xmlTextReaderRead(reader);
+      continue;
+    }
     
     _epub_print_debug(opf->epub, DEBUG_INFO, 
                       "manifest item %s href %s media-type %s", 
