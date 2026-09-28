@@ -806,6 +806,9 @@ void _opf_parse_manifest(struct opf *opf, xmlTextReaderPtr reader) {
 }
 
 struct manifest *_opf_manifest_get_by_id(struct opf *opf, xmlChar* id) {
+  if (!id) {
+    return NULL;
+  }
   struct manifest data;
   data.id = id;
   
