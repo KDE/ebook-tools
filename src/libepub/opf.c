@@ -457,6 +457,9 @@ void _opf_parse_navmap(struct opf *opf, xmlTextReaderPtr reader) {
     ret = xmlTextReaderRead(reader);
   }
 
+  if (item)
+    _list_free_toc_item(item);
+
   opf->toc->navMap = tc;
   _epub_print_debug(opf->epub, DEBUG_INFO, "finished parsing nav map");
 }
@@ -536,6 +539,9 @@ void _opf_parse_navlist(struct opf *opf, xmlTextReaderPtr reader) {
     ret = xmlTextReaderRead(reader);
   }
   
+  if (item)
+    _list_free_toc_item(item);
+
   opf->toc->navList = tc;
   _epub_print_debug(opf->epub, DEBUG_INFO, "finished parsing nav list");
   
@@ -615,6 +621,9 @@ void _opf_parse_pagelist(struct opf *opf, xmlTextReaderPtr reader) {
     ret = xmlTextReaderRead(reader);
   }
   
+  if (item)
+    _list_free_toc_item(item);
+
   opf->toc->navList = tc;
   _epub_print_debug(opf->epub, DEBUG_INFO, "finished parsing page list");
     
