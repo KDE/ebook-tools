@@ -9,6 +9,7 @@ cmake_minimum_required(VERSION 3.28)
 project (EBOOK-TOOLS C)
 
 option(BUILD_TOOLS "Build command-line tools" ON)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 #set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(LIBRARY_OUTPUT_PATH ${EBOOK-TOOLS_BINARY_DIR}/libs)
