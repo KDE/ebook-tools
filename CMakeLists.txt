@@ -8,6 +8,8 @@ cmake_minimum_required(VERSION 3.28)
 
 project (EBOOK-TOOLS C)
 
+option(BUILD_TOOLS "Build command-line tools" ON)
+
 #set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(LIBRARY_OUTPUT_PATH ${EBOOK-TOOLS_BINARY_DIR}/libs)
 set(EXECUTABLE_OUTPUT_PATH ${EBOOK-TOOLS_BINARY_DIR}/bin)

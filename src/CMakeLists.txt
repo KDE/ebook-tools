@@ -3,5 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 add_subdirectory (libepub)
-add_subdirectory (tools)
+if(BUILD_TOOLS)
+  add_subdirectory (tools)
+endif()
 
