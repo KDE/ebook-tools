@@ -339,7 +339,7 @@ struct tocLabel *_opf_parse_navlabel(struct opf *opf, xmlTextReaderPtr reader) {
   }
 
   if (ret != 1) {
-    free(new);
+    _list_free_toc_label(new);
     return NULL;
   }
   _epub_print_debug(opf->epub, DEBUG_INFO, 
