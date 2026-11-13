@@ -433,21 +433,23 @@ void _opf_parse_navmap(struct opf *opf, xmlTextReaderPtr reader) {
     }
     
     if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navLabel")) {
-      if (item) {
-        if (! item->label)
-          item->label = NewListAlloc(LIST, NULL, NULL, NULL); //tocLabel
-        AddNode(item->label, NewListNode(item->label, 
-                                         _opf_parse_navlabel(opf, reader)));
-      } else { // Not inside navpoint
-        AddNode(tc->label, NewListNode(tc->label, 
-                                       _opf_parse_navlabel(opf, reader)));
+      struct tocLabel *label = _opf_parse_navlabel(opf, reader);
+      if (label) {
+        if (item) {
+          if (! item->label)
+            item->label = NewListAlloc(LIST, NULL, NULL, NULL); //tocLabel
+          AddNode(item->label, NewListNode(item->label, label));
+        } else { // Not inside navpoint
+          AddNode(tc->label, NewListNode(tc->label, label));
+        }
       }
     } else if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navInfo")) {
-        AddNode(tc->info, NewListNode(tc->info, 
-                                      _opf_parse_navlabel(opf, reader)));
-        if (item)
-          _epub_print_debug(opf->epub, DEBUG_WARNING, 
-                            "nav info inside nav point element");
+      struct tocLabel *label = _opf_parse_navlabel(opf, reader);
+      if (label)
+        AddNode(tc->info, NewListNode(tc->info, label));
+      if (item)
+        _epub_print_debug(opf->epub, DEBUG_WARNING,
+                          "nav info inside nav point element");
     } else 
       if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"content")) {
         if (item)
@@ -515,18 +517,20 @@ void _opf_parse_navlist(struct opf *opf, xmlTextReaderPtr reader) {
       continue;
     }
     if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navLabel")) {
-      if (item) {
-        if (! item->label)
-          item->label = NewListAlloc(LIST, NULL, NULL, NULL); //tocLabel
-        AddNode(item->label, NewListNode(item->label, 
-                                         _opf_parse_navlabel(opf, reader)));
-      } else { // Not inside navpoint
-        AddNode(tc->label, NewListNode(tc->label, 
-                                       _opf_parse_navlabel(opf, reader)));
+      struct tocLabel *label = _opf_parse_navlabel(opf, reader);
+      if (label) {
+        if (item) {
+          if (! item->label)
+            item->label = NewListAlloc(LIST, NULL, NULL, NULL); //tocLabel
+          AddNode(item->label, NewListNode(item->label, label));
+        } else { // Not inside navpoint
+          AddNode(tc->label, NewListNode(tc->label, label));
+        }
       }
     } else if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navInfo")) {
-      AddNode(tc->info, NewListNode(tc->info, 
-                                    _opf_parse_navlabel(opf, reader)));
+      struct tocLabel *label = _opf_parse_navlabel(opf, reader);
+      if (label)
+        AddNode(tc->info, NewListNode(tc->info, label));
       if (item)
         _epub_print_debug(opf->epub, DEBUG_WARNING, 
                           "nav info inside nav target element");
@@ -597,18 +601,20 @@ void _opf_parse_pagelist(struct opf *opf, xmlTextReaderPtr reader) {
     }
 
     if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navLabel")) {
-      if (item) {
-        if (! item->label)
-          item->label = NewListAlloc(LIST, NULL, NULL, NULL); //tocLabel
-        AddNode(item->label, NewListNode(item->label, 
-                                         _opf_parse_navlabel(opf, reader)));
-      } else { // Not inside navpoint
-        AddNode(tc->label, NewListNode(tc->label, 
-                                       _opf_parse_navlabel(opf, reader)));
+      struct tocLabel *label = _opf_parse_navlabel(opf, reader);
+      if (label) {
+        if (item) {
+          if (! item->label)
+            item->label = NewListAlloc(LIST, NULL, NULL, NULL); //tocLabel
+          AddNode(item->label, NewListNode(item->label, label));
+        } else { // Not inside navpoint
+          AddNode(tc->label, NewListNode(tc->label, label));
+        }
       }
     } else if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navInfo")) {
-      AddNode(tc->info, NewListNode(tc->info, 
-                                    _opf_parse_navlabel(opf, reader)));
+      struct tocLabel *label = _opf_parse_navlabel(opf, reader);
+      if (label)
+        AddNode(tc->info, NewListNode(tc->info, label));
       if (item)
         _epub_print_debug(opf->epub, DEBUG_WARNING, 
                           "nav info inside page target element");
