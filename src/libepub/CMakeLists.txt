@@ -9,5 +9,8 @@ target_link_libraries (epub ${LIBZIP_LIBRARY} ${LIBXML2_LIBRARIES})
 
 set_target_properties (epub PROPERTIES VERSION 0.2.1 SOVERSION 0)
 
-install ( TARGETS epub RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX} )
-install ( FILES epub.h epub_shared.h epub_version.h DESTINATION include )
+install(TARGETS epub
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES epub.h epub_shared.h epub_version.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

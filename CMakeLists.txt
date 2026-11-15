@@ -11,13 +11,9 @@ project (EBOOK-TOOLS C)
 option(BUILD_TOOLS "Build command-line tools" ON)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
-#set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
-set(LIBRARY_OUTPUT_PATH ${EBOOK-TOOLS_BINARY_DIR}/libs)
-set(EXECUTABLE_OUTPUT_PATH ${EBOOK-TOOLS_BINARY_DIR}/bin)
+include(GNUInstallDirs)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-
-set(LIB_SUFFIX "" CACHE STRING "Define suffix of library directory name (32/64)")
 
 find_package(LibXml2 REQUIRED)
 find_package(LibZip REQUIRED)
