@@ -776,6 +776,10 @@ void _opf_parse_manifest(struct opf *opf, xmlTextReaderPtr reader) {
   
   _epub_print_debug(opf->epub, DEBUG_INFO, "parsing manifest");
 
+  if (FreeList(opf->manifest, (ListFreeFunc)_list_free_manifest) != LLIST_NULL) {
+    _epub_print_debug(opf->epub, DEBUG_WARNING,
+                      "OPF file is malformed: multiple manifest elements");
+  }
   opf->manifest = NewListAlloc(LIST, NULL, NULL, 
                                (NodeCompareFunc)_list_cmp_manifest_by_id );
 
