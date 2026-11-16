@@ -20,7 +20,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of library directory name (32/64)")
 
 find_package(LibXml2 REQUIRED)
-find_package(LibZip REQUIRED)
+find_package(LibZip 1.7.2 CONFIG REQUIRED)
 
 if(CMAKE_C_COMPILER_ID MATCHES GNU)
   set(CMAKE_C_FLAGS "-Wall -W -Wno-long-long -Wundef -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -Wshadow -fno-common ${CMAKE_C_FLAGS}")
