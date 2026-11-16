@@ -338,6 +338,11 @@ struct tocLabel *_opf_parse_navlabel(struct opf *opf, xmlTextReaderPtr reader) {
          xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"navInfo")) {
     if (! xmlStrcasecmp(xmlTextReaderConstName(reader),(xmlChar *)"text") &&
         xmlTextReaderNodeType(reader) == 1) {
+      if (new->text) {
+        _epub_print_debug(opf->epub, DEBUG_WARNING,
+                          "OPF file is malformed: multiple text elements in navLabel/navInfo");
+        free(new->text);
+      }
       new->text = (xmlChar *)xmlTextReaderReadString(reader);
     }
     ret = xmlTextReaderRead(reader);
