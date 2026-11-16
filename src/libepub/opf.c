@@ -697,6 +697,12 @@ void _opf_parse_spine(struct opf *opf, xmlTextReaderPtr reader) {
 
   _epub_print_debug(opf->epub, DEBUG_INFO, "parsing spine");
   
+  if (FreeList(opf->spine, (ListFreeFunc)_list_free_spine) != LLIST_NULL) {
+    _epub_print_debug(opf->epub, DEBUG_WARNING,
+                      "OPF file is malformed: multiple spine elements");
+  }
+  free(opf->tocName);
+
   opf->spine = NewListAlloc(LIST, NULL, NULL, NULL); 
   opf->tocName = xmlTextReaderGetAttribute(reader, (xmlChar *)"toc");
   
