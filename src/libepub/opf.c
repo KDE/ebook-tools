@@ -85,6 +85,26 @@ xmlChar *_get_possible_namespace(xmlTextReaderPtr reader,
   return tmp;
 }
 
+void _opf_free_metadata(struct metadata *meta) {
+  FreeList(meta->id, (ListFreeFunc)_list_free_id);
+  FreeList(meta->title, free);
+  FreeList(meta->creator, (ListFreeFunc)_list_free_creator);
+  FreeList(meta->contrib, (ListFreeFunc)_list_free_creator);
+  FreeList(meta->subject, free);
+  FreeList(meta->publisher, free);
+  FreeList(meta->description, free);
+  FreeList(meta->date, (ListFreeFunc)_list_free_date);
+  FreeList(meta->type, free);
+  FreeList(meta->format, free);
+  FreeList(meta->source, free);
+  FreeList(meta->lang, free);
+  FreeList(meta->relation, free);
+  FreeList(meta->coverage, free);
+  FreeList(meta->rights, free);
+  FreeList(meta->meta, (ListFreeFunc)_list_free_meta);
+  free(meta);
+}
+
 void _opf_init_metadata(struct opf *opf) {
   struct metadata *meta = malloc(sizeof(struct metadata));
 
@@ -105,27 +125,12 @@ void _opf_init_metadata(struct opf *opf) {
   meta->rights = NewListAlloc(LIST, NULL, NULL, (NodeCompareFunc)StringCompare);
   meta->meta = NewListAlloc(LIST, NULL, NULL, NULL);
 
+  if (opf->metadata) {
+    _epub_print_debug(opf->epub, DEBUG_WARNING,
+                      "OPF file is malformed: multiple metadata elements");
+    _opf_free_metadata(opf->metadata);
+  }
   opf->metadata = meta;
-}
-
-void _opf_free_metadata(struct metadata *meta) {
-  FreeList(meta->id, (ListFreeFunc)_list_free_id);
-  FreeList(meta->title, free);
-  FreeList(meta->creator, (ListFreeFunc)_list_free_creator);
-  FreeList(meta->contrib, (ListFreeFunc)_list_free_creator);
-  FreeList(meta->subject, free);
-  FreeList(meta->publisher, free);
-  FreeList(meta->description, free);
-  FreeList(meta->date, (ListFreeFunc)_list_free_date);
-  FreeList(meta->type, free);
-  FreeList(meta->format, free);
-  FreeList(meta->source, free);
-  FreeList(meta->lang, free);
-  FreeList(meta->relation, free);
-  FreeList(meta->coverage, free);
-  FreeList(meta->rights, free);
-  FreeList(meta->meta, (ListFreeFunc)_list_free_meta);
-  free(meta);
 }
 
 void _opf_parse_metadata(struct opf *opf, xmlTextReaderPtr reader) {
