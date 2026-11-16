@@ -716,8 +716,8 @@ void _opf_parse_spine(struct opf *opf, xmlTextReaderPtr reader) {
 							  opf->tocName);
 		} else {
 			_opf_parse_toc(opf, tocStr, size);
-			free(tocStr);
 		}
+		free(tocStr);
 	} else {
 		_epub_print_debug(opf->epub, DEBUG_ERROR, "Toc not in manifest (-) %s",
 						  opf->tocName);
